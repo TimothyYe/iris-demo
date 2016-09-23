@@ -11,5 +11,5 @@ type DefaultController struct {
 
 func (dc *DefaultController) DefaultHandler(ctx *iris.Context) {
 	hostName, _ := os.Hostname()
-	ctx.Text(iris.StatusOK, "Hostname is:"+hostName)
+	ctx.Text(iris.StatusOK, "Hostname is: "+hostName)
 }

@@ -22,3 +22,8 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+main
+main.exe
+iris-demo
+iris-demo.exe

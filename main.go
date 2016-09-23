@@ -50,7 +50,7 @@ func initialize(api *iris.Framework) {
 	userController := &controllers.UserController{}
 
 	//Register the default API handler
-	defController.Get("/", defController.DefaultHandler)
+	api.Get("/", defController.DefaultHandler)
 
 	//Use party to manage the prefix url
 	user := api.Party("/user")
