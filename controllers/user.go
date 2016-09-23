@@ -1,6 +1,10 @@
 package controllers
 
-import "github.com/kataras/iris"
+import (
+	"fmt"
+
+	"github.com/kataras/iris"
+)
 
 type UserController struct {
 }
@@ -25,11 +29,15 @@ func (uc *UserController) HandleLogin(ctx *iris.Context) {
 	name := string(ctx.FormValue("name"))
 	pwd := string(ctx.FormValue("password"))
 
-	if name != "wang" && pwd != "123456" {
-		resp := LoginResponse{Token: "", Result: false, Msg: "用户名或者密码不正确"}
+	fmt.Println("Name:" + name)
+	fmt.Println("Pwd:" + pwd)
+
+	if name == "wang" && pwd == "123456" {
+		resp := LoginResponse{Token: "sdakfjdsakdvmwiehfg==", Result: true, Msg: "登录成功"}
 		ctx.JSON(iris.StatusOK, resp)
+		return
 	}
 
-	resp := LoginResponse{Token: "sdakfjdsakdvmwiehfg==", Result: true, Msg: "登录成功"}
+	resp := LoginResponse{Token: "", Result: false, Msg: "用户名或者密码不正确"}
 	ctx.JSON(iris.StatusOK, resp)
 }

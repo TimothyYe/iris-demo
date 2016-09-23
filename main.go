@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"iris-demo/controllers"
+	"iris-demo/middleware"
 
 	"github.com/iris-contrib/graceful"
 	"github.com/iris-contrib/middleware/cors"
@@ -38,7 +39,7 @@ func initialize(api *iris.Framework) {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
-		AllowedHeaders:   []string{"Content-Type", "ACCEPT", "ORIGIN"},
+		AllowedHeaders:   []string{"Content-Type", "ACCEPT", "Authorization"},
 		AllowCredentials: true,
 		Debug:            true,
 	})
@@ -49,11 +50,14 @@ func initialize(api *iris.Framework) {
 	defController := &controllers.DefaultController{}
 	userController := &controllers.UserController{}
 
+	//Middleware
+	middleWare := &middleware.TokenMiddleware{}
+
 	//Register the default API handler
 	api.Get("/", defController.DefaultHandler)
 
 	//Use party to manage the prefix url
 	user := api.Party("/user")
-	user.Get("/profile", userController.GetUserProfile)
+	user.Get("/profile", middleWare.Serve, userController.GetUserProfile)
 	user.Post("/login", userController.HandleLogin)
 }
