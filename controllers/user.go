@@ -15,9 +15,9 @@ type Profile struct {
 }
 
 type LoginResponse struct {
-	Token  string `json:"token"`
-	Result bool   `json:"result"`
-	Msg    string `json:"msg"`
+	Token string `json:"token"`
+	Code  string `json:"code"`
+	Msg   string `json:"msg"`
 }
 
 func (uc *UserController) GetUserProfile(ctx *iris.Context) {
@@ -33,11 +33,11 @@ func (uc *UserController) HandleLogin(ctx *iris.Context) {
 	fmt.Println("Pwd:" + pwd)
 
 	if name == "wang" && pwd == "123456" {
-		resp := LoginResponse{Token: "sdakfjdsakdvmwiehfg==", Result: true, Msg: "登录成功"}
+		resp := LoginResponse{Token: "sdakfjdsakdvmwiehfg==", Code: "00", Msg: "登录成功"}
 		ctx.JSON(iris.StatusOK, resp)
 		return
 	}
 
-	resp := LoginResponse{Token: "", Result: false, Msg: "用户名或者密码不正确"}
+	resp := LoginResponse{Token: "", Code: "01", Msg: "用户名或者密码不正确"}
 	ctx.JSON(iris.StatusOK, resp)
 }
