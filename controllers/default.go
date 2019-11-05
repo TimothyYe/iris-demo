@@ -3,13 +3,15 @@ package controllers
 import (
 	"os"
 
-	"github.com/kataras/iris"
+	"github.com/kataras/iris/v12"
 )
 
-type DefaultController struct {
-}
+func DefaultHandler(ctx iris.Context) {
+	hostName, err := os.Hostname()
+	if err != nil {
+		ctx.StatusCode(iris.StatusInternalServerError)
+		return
+	}
 
-func (dc *DefaultController) DefaultHandler(ctx *iris.Context) {
-	hostName, _ := os.Hostname()
-	ctx.Text(iris.StatusOK, "Hostname is: "+hostName)
+	ctx.Writef("Hostname is: %s\n", hostName)
 }

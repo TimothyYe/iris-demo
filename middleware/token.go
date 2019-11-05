@@ -1,13 +1,13 @@
 package middleware
 
-import "github.com/kataras/iris"
+import "github.com/kataras/iris/v12"
 
-type TokenMiddleware struct{}
-
-func (m *TokenMiddleware) Serve(c *iris.Context) {
-	if c.RequestHeader("Authorization") == "sdakfjdsakdvmwiehfg==" {
-		c.Next()
-	} else {
-		c.Text(403, "Please login first!!")
+func TokenMiddleware(ctx iris.Context) {
+	if ctx.GetHeader("Authorization") == "sdakfjdsakdvmwiehfg==" {
+		ctx.Next()
+		return
 	}
+
+	ctx.StatusCode(iris.StatusForbidden)
+	ctx.WriteString("Please login first!!")
 }

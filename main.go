@@ -1,63 +1,58 @@
 package main
 
 import (
-	"fmt"
 	"os"
-	"time"
 
 	"iris-demo/controllers"
 	"iris-demo/middleware"
 
-	"github.com/iris-contrib/graceful"
-	"github.com/iris-contrib/middleware/cors"
-	"github.com/iris-contrib/middleware/logger"
-	"github.com/iris-contrib/middleware/recovery"
-	"github.com/kataras/iris"
+	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/logger"
+	"github.com/kataras/iris/v12/middleware/recover"
 )
 
 func main() {
 	api := iris.New()
 
-	//Init all the settings
+	// Init all the settings
 	initialize(api)
 
-	//Get port from environment variables, default port number is 7000
+	// Get port from environment variables, default port number is 7000
 	port := os.Getenv("PORT")
 
 	if port == "" {
 		port = "7000"
 	}
 
-	fmt.Println("Service is listening at:" + port)
-	graceful.Run(":"+port, time.Duration(10)*time.Second, api)
+	// It will shutdown gracefully on CTRL/CMD+C.
+	api.Run(iris.Addr(":" + port))
 }
 
-func initialize(api *iris.Framework) {
+func initialize(api *iris.Application) {
 	api.Use(logger.New())
-	api.Use(recovery.Handler)
+	api.Use(recover.New())
 
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
-		AllowedHeaders:   []string{"Content-Type", "ACCEPT", "Authorization"},
-		AllowCredentials: true,
-		Debug:            true,
-	})
+	corsMiddleware := func(ctx iris.Context) {
+		ctx.Header("Access-Control-Allow-Origin", "*")
+		ctx.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		ctx.Header("Access-Control-Allow-Credentials", "true")
+		ctx.Header("Access-Control-Allow-Headers", "Access-Control-Allow-Origin, Content-Type, ACCEPT, Authorization")
+		ctx.Next()
+	} // or	"github.com/iris-contrib/middleware/cors"
+	api.Use(corsMiddleware)
+	api.AllowMethods(iris.MethodOptions)
 
-	api.Use(c)
-
-	//Init controller
-	defController := &controllers.DefaultController{}
+	// Init custom controllers.
+	//
+	// Note: If you wish to take advandage of the Iris MVC feature
+	// please navigate through https://github.com/kataras/iris/wiki/MVC
 	userController := &controllers.UserController{}
 
-	//Middleware
-	middleWare := &middleware.TokenMiddleware{}
+	// Register the default API handler
+	api.Get("/", controllers.DefaultHandler)
 
-	//Register the default API handler
-	api.Get("/", defController.DefaultHandler)
-
-	//Use party to manage the prefix url
+	// Use party to manage the prefix url
 	user := api.Party("/user")
-	user.Get("/profile", middleWare.Serve, userController.GetUserProfile)
+	user.Get("/profile", middleware.TokenMiddleware, userController.GetUserProfile)
 	user.Post("/login", userController.HandleLogin)
 }
